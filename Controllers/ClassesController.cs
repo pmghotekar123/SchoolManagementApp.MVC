@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -16,10 +17,11 @@ namespace SchoolManagementApp.MVC.Controllers
     public class ClassesController : Controller
     {
         private readonly SchoolManagementDbContext _context;
-
-        public ClassesController(SchoolManagementDbContext context)
+        private readonly INotyfService _notyfService;
+        public ClassesController(SchoolManagementDbContext context, INotyfService notyfService)
         {
             _context = context;
+            _notyfService= notyfService;
         }
 
         // GET: Classes
@@ -211,7 +213,7 @@ namespace SchoolManagementApp.MVC.Controllers
                 enrollment.ClassId = classId;
                 enrollment.StudentId = studentId;
                 await _context.AddAsync(enrollment);
-                // _notyfService.Success($"Student Enrolled Successfully");
+                _notyfService.Success($"Student Enrolled Successfully");
             }
             else
             {
@@ -220,12 +222,12 @@ namespace SchoolManagementApp.MVC.Controllers
 
                 if(enrollment != null){
                     _context.Remove(enrollment);
-                    // _notyfService.Warning($"Student Unenrolled Successfully");
+                    _notyfService.Warning($"Student Unenrolled Successfully");
                 }    
             }
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(MangeEnrollments),
-            new { id= classId});
+            new {classId = classId});
         }
 
         private bool ClassExists(int id)
